@@ -1,0 +1,40 @@
+{
+  "manifest_version": 3,
+  "name": "eBay & Aukro Image Downloader",
+  "version": "1.2",
+  "description": "Скачивает картинки товаров с eBay и Aukro.",
+  "permissions": ["activeTab", "scripting", "downloads", "storage"],
+  "host_permissions": [
+    "*://*.ebay.com/*",
+    "*://*.ebay.de/*",
+    "*://*.ebay.co.uk/*",
+    "*://*.ebay.ca/*",
+    "*://*.ebay.com.au/*",
+    "*://*.aukro.cz/*",
+    "*://*.avito.ru/*",
+    "*://*.avito.st/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": [
+        "*://*.ebay.com/*",
+        "*://*.ebay.de/*",
+        "*://*.ebay.co.uk/*",
+        "*://*.ebay.ca/*",
+        "*://*.ebay.com.au/*",
+        "*://*.aukro.cz/*",
+        "*://*.avito.ru/*",
+        "*://*.avito.st/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
