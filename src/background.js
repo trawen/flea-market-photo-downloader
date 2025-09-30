@@ -2,7 +2,7 @@ chrome.runtime.onMessage.addListener((msg) => {
   console.log('msg', msg)
   if (msg.action !== 'downloadImages') return
 
-  let { images = [], folder, pageId, pageUrl, meta = '' } = msg
+  let { images = [], folder, pageId, host, meta = '' } = msg
   if (!images.length) return
 
   images.forEach((url, idx) => {
@@ -25,14 +25,10 @@ chrome.runtime.onMessage.addListener((msg) => {
 
   meta = JSON.stringify(meta, null, 2)
 
-  // Формируем простой HTML с ссылкой на товар и скачиваем его как product_link.html
   try {
-    const safeUrl = String(pageUrl || '')
     const htmlContent = `<!doctype html>
   <meta charset="utf-8">
-  <title>eBay: ссылка на товар</title>
   <body>
-    <a href="${safeUrl}" target="_blank" rel="noopener noreferrer">Открыть товар на eBay</a>
     <pre>${meta}</pre>
   </body>`
 
@@ -40,13 +36,13 @@ chrome.runtime.onMessage.addListener((msg) => {
     chrome.downloads.download(
       {
         url: dataUrl,
-        filename: `${folder}/product_link.html`,
+        filename: `${folder}/item.html`,
       },
       (downloadId) => {
         if (chrome.runtime.lastError) {
-          console.error('Ошибка скачивания product_link.html:', chrome.runtime.lastError)
+          console.error('Ошибка скачивания item.html:', chrome.runtime.lastError)
         } else {
-          console.log('Скачивание product_link.html запущено:', downloadId)
+          console.log('Скачивание item.html запущено:', downloadId)
         }
       }
     )
@@ -57,7 +53,7 @@ chrome.runtime.onMessage.addListener((msg) => {
   // сохраняем только ID + дату
   chrome.storage.sync.get(['downloaded'], (res) => {
     const downloaded = res.downloaded || {}
-    downloaded[pageId] = new Date().toLocaleString()
+    downloaded[pageId] = { date: new Date().toLocaleString(), host: host }
     chrome.storage.sync.set({ downloaded }, () => {
       console.log('Сохранена дата скачивания для', pageId)
     })
