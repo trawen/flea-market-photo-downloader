@@ -2,32 +2,17 @@ import { simulateClickByCoordinates, delay, getCleanUrl } from '../utils/index.j
 
 export class Aukro {
   async _getImages() {
-    this._openGallery()
+    await this._openGallery()
 
     let images = []
     try {
       const container = document.querySelector('div.cdk-overlay-container')
-      if (!container) {
-        alert('Не найден контейнер cdk-overlay-container.')
-        return
-      }
+      if (!container) throw new Error('Не найден контейнер cdk-overlay-container.')
 
-      images = Array.from(container.querySelectorAll('auk-media-gallery-thumb img'))
-        .map((img, i) => {
-          let url = img.getAttribute('src')
-          if (url) {
-            // Убираем сегмент с размером, например /73x73/
-            url = url.replace(/\/\d+x\d+\//, '/')
-            return url
-          }
-          return null
-        })
-        .filter(Boolean)
-
-      if (images.length === 0) {
-        alert('Не удалось найти картинки внутри auk-media-gallery-thumb.')
-        return
-      }
+      images = Array.from(container.querySelectorAll('auk-media-gallery-thumb img')).map((img, i) => {
+        // remove from url 73x73
+        return img.src.replace(/\/\d+x\d+\//, '/')
+      })
     } catch (e) {
       console.log('getImages error', e)
     }
@@ -59,7 +44,7 @@ export class Aukro {
       meta.description = descriptionEl ? descriptionEl.innerText.trim() : ''
 
       const sellerEl = document.querySelector('auk-user-chip a')
-      meta.sellerUrl = sellerEl.href
+      meta.sellerUrl = sellerEl?.href
     } catch (e) {
       console.log('getMeta error', e)
     }

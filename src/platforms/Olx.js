@@ -1,28 +1,22 @@
 import { simulateClickByCoordinates, delay } from '../utils/index.js'
 
-export class Avito {
+export class Olx {
   async _getImages() {
-    const images = []
-
     await this._openGallery()
-
-    const el = document.querySelectorAll('[data-marker="extended-image-preview/item"]')
-    const img = document.querySelector('[data-marker="extended-gallery/frame-img"]')
-
-    console.log('el', el)
-    console.log('img', img)
+    let images = []
     try {
-      if (img) {
-        for (let a = 0; a < el.length; a += 1) {
-          const img = document.querySelector('[data-marker="extended-gallery/frame-img"]')
-          images.push(img.src)
-          this._nextImage()
-          await delay(200)
-        }
-      }
+      const container = document.querySelector('[data-testid="image-galery-container"]')
+      if (!container) throw new Error('Не найден контейнер data-testid="image-galery-container"')
+
+      images = Array.from(container.querySelectorAll('[data-testid="swiper-image"]'))
+        .map((img, i) => {
+          return img.scr
+        })
+        .filter(Boolean)
     } catch (e) {
       console.log('getImages error', e)
     }
+
     return images
   }
 
@@ -39,18 +33,18 @@ export class Avito {
     }
 
     try {
-      meta.title = document.querySelector('h1')?.innerText || document.title || 'avito-item'
+      meta.title = document.querySelector('[data-testid="offer_title"]')?.innerText || document.title || 'olx-item'
 
-      const addrEl = document.querySelector('[itemprop="address"]')
+      const addrEl = document.querySelector('[data-testid="map-aside-section"] section')
       meta.address = addrEl ? addrEl.innerText.trim() : ''
 
-      const priceEl = document.querySelector('span[data-marker="item-view/item-price"]')
+      const priceEl = document.querySelector('[data-testid="ad-price-container"]')
       meta.price = priceEl ? priceEl.innerText.trim() : ''
 
-      const descriptionEl = document.querySelector('div[data-marker="item-view/item-description"]')
+      const descriptionEl = document.querySelector('[data-testid="ad_description"]')
       meta.description = descriptionEl ? descriptionEl.innerText.trim() : ''
 
-      const sellerEl = document.querySelector('a[data-marker="seller-link/link"]')
+      const sellerEl = document.querySelector('[data-testid="user-profile-link"]')
       meta.sellerUrl = sellerEl?.href
     } catch (e) {
       console.log('getMeta error', e)
@@ -59,9 +53,9 @@ export class Avito {
   }
 
   async _openGallery() {
-    await this._skipVideoSlide()
-
-    const { x, y, width, height } = document.querySelector('[data-marker="item-view/gallery"]').getBoundingClientRect()
+    const { x, y, width, height } = document
+      .querySelector('[data-testid="image-galery-container"]')
+      .getBoundingClientRect()
     console.log(' _openGallery', x, y, width, height)
     simulateClickByCoordinates(x + width / 2, y + height / 2)
     await delay(500)
@@ -100,8 +94,8 @@ export class Avito {
     try {
       const u = new URL(window.location.href)
       const lastSeg = u.pathname.split('/').filter(Boolean).pop()
-      if (!lastSeg) return null
-      return 'avito.ru/' + lastSeg
+      if (!lastSeg) throw new Error('Make folder get last segment error')
+      return u.hostname.replace(/^www\./, '') + '/' + lastSeg
     } catch (e) {
       return null
     }
