@@ -313,9 +313,9 @@
         const container = document.querySelector('[data-testid="image-galery-container"]');
         if (!container)
           throw new Error('\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u043A\u043E\u043D\u0442\u0435\u0439\u043D\u0435\u0440 data-testid="image-galery-container"');
-        images = Array.from(container.querySelectorAll('[data-testid="swiper-image"]')).map((img, i) => {
-          return img.scr;
-        }).filter(Boolean);
+        images = Array.from(container.querySelectorAll('[data-testid="swiper-image"]')).map((img) => {
+          return img.src;
+        });
       } catch (e) {
         console.log("getImages error", e);
       }
@@ -370,8 +370,7 @@
     }
     _getId() {
       try {
-        const u = new URL(window.location.href);
-        return u.pathname.split("_").pop();
+        return window.location.href.match(/-([A-Za-z0-9]+)\.html/)[1];
       } catch (e) {
         return null;
       }
