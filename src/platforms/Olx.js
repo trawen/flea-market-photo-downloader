@@ -8,11 +8,9 @@ export class Olx {
       const container = document.querySelector('[data-testid="image-galery-container"]')
       if (!container) throw new Error('Не найден контейнер data-testid="image-galery-container"')
 
-      images = Array.from(container.querySelectorAll('[data-testid="swiper-image"]'))
-        .map((img, i) => {
-          return img.scr
-        })
-        .filter(Boolean)
+      images = Array.from(container.querySelectorAll('[data-testid="swiper-image"]')).map((img) => {
+        return img.src
+      })
     } catch (e) {
       console.log('getImages error', e)
     }
@@ -83,8 +81,7 @@ export class Olx {
 
   _getId() {
     try {
-      const u = new URL(window.location.href)
-      return u.pathname.split('_').pop()
+      return window.location.href.match(/-([A-Za-z0-9]+)\.html/)[1]
     } catch (e) {
       return null
     }

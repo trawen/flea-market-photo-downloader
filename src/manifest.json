@@ -13,7 +13,8 @@
     "*://*.aukro.cz/*",
     "*://*.avito.ru/*",
     "*://*.avito.st/*",
-    "*://*.violity.com/*"
+    "*://*.violity.com/*",
+    "*://*.olx.ua/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -39,7 +40,8 @@
         "*://*.aukro.cz/*",
         "*://*.avito.ru/*",
         "*://*.avito.st/*",
-        "*://*.violity.com/*"
+        "*://*.violity.com/*",
+        "*://*.olx.ua/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle",
