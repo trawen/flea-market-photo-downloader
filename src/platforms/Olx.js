@@ -8,7 +8,7 @@ export class Olx {
       const container = document.querySelector('[data-testid="image-galery-container"]')
       if (!container) throw new Error('Не найден контейнер data-testid="image-galery-container"')
 
-      images = Array.from(container.querySelectorAll('[data-testid="swiper-image"]')).map((img) => {
+      images = Array.from(container.querySelectorAll('.swiper-zoom-container img')).map((img) => {
         return img.src
       })
     } catch (e) {
