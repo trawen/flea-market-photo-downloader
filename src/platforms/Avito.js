@@ -59,7 +59,7 @@ export class Avito {
   }
 
   async _openGallery() {
-    this._skipVideoSlide()
+    await this._skipVideoSlide()
 
     const { x, y, width, height } = document.querySelector('[data-marker="item-view/gallery"]').getBoundingClientRect()
     console.log(' _openGallery', x, y, width, height)
