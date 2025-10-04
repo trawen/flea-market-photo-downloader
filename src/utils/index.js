@@ -2,7 +2,7 @@ export function delay(ms) {
   return new Promise((res) => setTimeout(res, ms))
 }
 
-export function clickAtCoordinatesWithAnimation(x, y) {
+function animateClick(x, y) {
   const indicator = document.createElement('div')
   indicator.style.position = 'fixed'
   indicator.style.left = x - 10 + 'px'
@@ -33,8 +33,10 @@ export function clickAtCoordinatesWithAnimation(x, y) {
 }
 
 export function simulateClickByCoordinates(x, y) {
-  clickAtCoordinatesWithAnimation(x, y)
+  console.log('simulateClickByCoordinates', x, y)
+  animateClick(x, y)
   const targetElement = document.elementFromPoint(x, y)
+  console.log('targetElement', targetElement)
   if (targetElement) {
     const clickEvent = new MouseEvent('click', {
       bubbles: true,

@@ -3,7 +3,7 @@
   function delay(ms) {
     return new Promise((res) => setTimeout(res, ms));
   }
-  function clickAtCoordinatesWithAnimation(x, y) {
+  function animateClick(x, y) {
     const indicator = document.createElement("div");
     indicator.style.position = "fixed";
     indicator.style.left = x - 10 + "px";
@@ -31,8 +31,10 @@
     setTimeout(() => indicator.remove(), 500);
   }
   function simulateClickByCoordinates(x, y) {
-    clickAtCoordinatesWithAnimation(x, y);
+    console.log("simulateClickByCoordinates", x, y);
+    animateClick(x, y);
     const targetElement = document.elementFromPoint(x, y);
+    console.log("targetElement", targetElement);
     if (targetElement) {
       const clickEvent = new MouseEvent("click", {
         bubbles: true,
@@ -54,8 +56,11 @@
   var Avito = class {
     async _getImages() {
       const images = [];
-      const el = document.querySelectorAll('[data-marker="image-preview/item"]');
+      await this._openGallery();
+      const el = document.querySelectorAll('[data-marker="extended-image-preview/item"]');
       const img = document.querySelector('[data-marker="extended-gallery/frame-img"]');
+      console.log("el", el);
+      console.log("img", img);
       try {
         if (img) {
           for (let a = 0; a < el.length; a += 1) {
@@ -97,12 +102,25 @@
       return meta;
     }
     async _openGallery() {
+      this._skipVideoSlide();
       const { x, y, width, height } = document.querySelector('[data-marker="item-view/gallery"]').getBoundingClientRect();
+      console.log(" _openGallery", x, y, width, height);
       simulateClickByCoordinates(x + width / 2, y + height / 2);
       await delay(500);
     }
+    async _skipVideoSlide() {
+      const items = document.querySelectorAll('[data-marker="image-preview/item"]');
+      if (items.length > 1) {
+        const firstItem = items[0];
+        if (firstItem.dataset.type === "video") {
+          items[1].click();
+          await delay(500);
+        }
+      }
+    }
     async _nextImage() {
       const { x, y, width, height } = document.querySelector('[data-marker="extended-gallery-frame/control-right"]').getBoundingClientRect();
+      console.log("_nextImage", x, y, width, height, x + width / 2, y + height / 2);
       simulateClickByCoordinates(x + width / 2, y + height / 2);
     }
     _getId() {
@@ -305,7 +323,7 @@
   };
   var PlatformFactory = class {
     static create(url) {
-      const hostname = new URL(url).hostname;
+      const hostname = new URL(url).hostname.replace(/^www\./, "");
       console.log("Avito", Avito);
       console.log("hostname", hostname);
       const Adapter = adapters[hostname];

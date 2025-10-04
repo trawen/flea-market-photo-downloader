@@ -11,7 +11,7 @@ const adapters = {
 
 export default class PlatformFactory {
   static create(url) {
-    const hostname = new URL(url).hostname
+    const hostname = new URL(url).hostname.replace(/^www\./, '')
     console.log('Avito', Avito)
     console.log('hostname', hostname)
     const Adapter = adapters[hostname]

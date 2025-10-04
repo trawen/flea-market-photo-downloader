@@ -13,7 +13,7 @@
     chrome.storage.sync.get(["downloaded"], (res) => {
       const downloaded = res.downloaded || {};
       if (downloaded[pageId]) {
-        statusEl.textContent = `\u041A\u0430\u0440\u0442\u0438\u043D\u043A\u0438 \u0443\u0436\u0435 \u0441\u043A\u0430\u0447\u0430\u043D\u044B: ${downloaded[pageId].date}`;
+        statusEl.textContent = `\u041A\u0430\u0440\u0442\u0438\u043D\u043A\u0438 \u0443\u0436\u0435 \u0441\u043A\u0430\u0447\u0430\u043D\u044B: ${downloaded[pageId]?.date}`;
       } else {
         statusEl.textContent = "\u041A\u0430\u0440\u0442\u0438\u043D\u043A\u0438 \u0435\u0449\u0451 \u043D\u0435 \u0441\u043A\u0430\u0447\u0430\u043D\u044B.";
       }

@@ -4,9 +4,13 @@ export class Avito {
   async _getImages() {
     const images = []
 
-    const el = document.querySelectorAll('[data-marker="image-preview/item"]')
+    await this._openGallery()
+
+    const el = document.querySelectorAll('[data-marker="extended-image-preview/item"]')
     const img = document.querySelector('[data-marker="extended-gallery/frame-img"]')
 
+    console.log('el', el)
+    console.log('img', img)
     try {
       if (img) {
         for (let a = 0; a < el.length; a += 1) {
@@ -55,15 +59,31 @@ export class Avito {
   }
 
   async _openGallery() {
+    this._skipVideoSlide()
+
     const { x, y, width, height } = document.querySelector('[data-marker="item-view/gallery"]').getBoundingClientRect()
+    console.log(' _openGallery', x, y, width, height)
     simulateClickByCoordinates(x + width / 2, y + height / 2)
     await delay(500)
+  }
+
+  async _skipVideoSlide() {
+    const items = document.querySelectorAll('[data-marker="image-preview/item"]')
+
+    if (items.length > 1) {
+      const firstItem = items[0]
+      if (firstItem.dataset.type === 'video') {
+        items[1].click()
+        await delay(500)
+      }
+    }
   }
 
   async _nextImage() {
     const { x, y, width, height } = document
       .querySelector('[data-marker="extended-gallery-frame/control-right"]')
       .getBoundingClientRect()
+    console.log('_nextImage', x, y, width, height, x + width / 2, y + height / 2)
     simulateClickByCoordinates(x + width / 2, y + height / 2)
   }
 
