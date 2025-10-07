@@ -1,7 +1,6 @@
 import PlatformFactory from './PlatformFactory.js'
 
 const Platform = PlatformFactory.create(window.location.href)
-console.log('Platform', Platform)
 if (Platform) {
   chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
     if (msg.action === 'collectImages') {

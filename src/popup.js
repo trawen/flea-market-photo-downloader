@@ -1,3 +1,5 @@
+import PlatformFactory from './PlatformFactory.js'
+
 document.addEventListener('DOMContentLoaded', async () => {
   const statusEl = document.getElementById('status')
   const btn = document.getElementById('downloadBtn')
@@ -7,14 +9,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     statusEl.textContent = 'Неактивная вкладка или нет URL.'
     return
   }
+  console.log('TAB', tab)
 
-  const url = new URL(tab.url)
-  let pageId = (url.pathname.match(/(\d{6,})/) || url.search.match(/itemId=(\d+)/) || []).pop?.() || url.pathname
+  const Platform = PlatformFactory.create(tab.url)
 
-  chrome.storage.sync.get(['downloaded'], (res) => {
-    const downloaded = res.downloaded || {}
-    if (downloaded[pageId]) {
-      statusEl.textContent = `Картинки уже скачаны: ${downloaded[pageId]?.date}`
+  chrome.storage.sync.get([Platform.pageHost], (res) => {
+    const data = res[Platform.pageHost] || []
+    console.log('DATA', data)
+    const downloaded = data.find((x) => x.id === Platform.pageId)
+    if (downloaded) {
+      statusEl.textContent = `Картинки уже скачаны: ${downloaded?.date}`
     } else {
       statusEl.textContent = 'Картинки ещё не скачаны.'
     }
@@ -40,8 +44,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         chrome.runtime.sendMessage({
           action: 'downloadImages',
           ...result,
-          pageId,
-          host: url.host,
         })
 
         setTimeout(() => {

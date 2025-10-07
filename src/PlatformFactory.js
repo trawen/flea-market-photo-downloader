@@ -9,16 +9,16 @@ const adapters = {
   'violity.com': Violity,
   'aukro.cz': Aukro,
   'olx.ua': Olx,
+  'olx.pt': Olx,
 }
 
 export default class PlatformFactory {
   static create(url) {
     const hostname = new URL(url).hostname.replace(/^www\./, '')
-    console.log('Avito', Avito)
     console.log('hostname', hostname)
     const Adapter = adapters[hostname]
     console.log('Adapter', Adapter)
-    return Adapter ? new Adapter() : null
+    return Adapter ? new Adapter(url) : null
   }
 }
 

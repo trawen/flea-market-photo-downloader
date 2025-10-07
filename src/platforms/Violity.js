@@ -1,6 +1,12 @@
 import { simulateClickByCoordinates, delay, getCleanUrl } from '../utils/index.js'
 
 export class Violity {
+  constructor(pageUrl) {
+    this.pageUrl = pageUrl
+    this.pageId = this.pageUrl.match(/-([A-Za-z0-9]+)\.html/)[1]
+    this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, '')
+  }
+
   async _getImages() {
     const hasGallery = await this._openGallery()
     try {
@@ -17,8 +23,8 @@ export class Violity {
 
   async _getMeta() {
     const meta = {
-      id: this._getId(),
-      itemUrl: getCleanUrl(),
+      id: this.pageId,
+      itemUrl: this.pageUrl,
       sellerUrl: '',
       title: '',
       address: '',
@@ -47,7 +53,6 @@ export class Violity {
     return meta
   }
 
-  // about_lot_img
   async _openGallery() {
     const sliderEl = document.getElementById('big_img_slider')
 
@@ -71,7 +76,7 @@ export class Violity {
   }
 
   _makeFolder() {
-    const u = new URL(window.location.href)
+    const u = new URL(this.pageUrl)
     const lastSeg = u.pathname.split('/').filter(Boolean).pop()
     if (!lastSeg) return null
     return 'violity.ru/' + lastSeg
@@ -79,6 +84,11 @@ export class Violity {
 
   async collectData() {
     return {
+      page: {
+        id: this.pageId,
+        host: this.pageHost,
+        url: this.pageUrl,
+      },
       images: await this._getImages(),
       meta: await this._getMeta(),
       folder: this._makeFolder(),

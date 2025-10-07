@@ -1,6 +1,12 @@
 import { simulateClickByCoordinates, delay } from '../utils/index.js'
 
 export class Avito {
+  constructor(pageUrl) {
+    this.pageUrl = pageUrl
+    this.pageId = new URL(this.pageUrl).pathname.split('_').pop()
+    this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, '')
+  }
+
   async _getImages() {
     const images = []
 
@@ -9,8 +15,6 @@ export class Avito {
     const el = document.querySelectorAll('[data-marker="extended-image-preview/item"]')
     const img = document.querySelector('[data-marker="extended-gallery/frame-img"]')
 
-    console.log('el', el)
-    console.log('img', img)
     try {
       if (img) {
         for (let a = 0; a < el.length; a += 1) {
@@ -28,8 +32,8 @@ export class Avito {
 
   async _getMeta() {
     const meta = {
-      id: this._getId(),
-      itemUrl: window.location.href,
+      id: this.pageId,
+      itemUrl: this.pageUrl,
       sellerUrl: '',
       title: '',
       address: '',
@@ -62,7 +66,6 @@ export class Avito {
     await this._skipVideoSlide()
 
     const { x, y, width, height } = document.querySelector('[data-marker="item-view/gallery"]').getBoundingClientRect()
-    console.log(' _openGallery', x, y, width, height)
     simulateClickByCoordinates(x + width / 2, y + height / 2)
     await delay(500)
   }
@@ -83,22 +86,12 @@ export class Avito {
     const { x, y, width, height } = document
       .querySelector('[data-marker="extended-gallery-frame/control-right"]')
       .getBoundingClientRect()
-    console.log('_nextImage', x, y, width, height, x + width / 2, y + height / 2)
     simulateClickByCoordinates(x + width / 2, y + height / 2)
-  }
-
-  _getId() {
-    try {
-      const u = new URL(window.location.href)
-      return u.pathname.split('_').pop()
-    } catch (e) {
-      return null
-    }
   }
 
   _makeFolder() {
     try {
-      const u = new URL(window.location.href)
+      const u = new URL(this.pageUrl)
       const lastSeg = u.pathname.split('/').filter(Boolean).pop()
       if (!lastSeg) return null
       return 'avito.ru/' + lastSeg
@@ -109,6 +102,11 @@ export class Avito {
 
   async collectData() {
     return {
+      page: {
+        id: this.pageId,
+        host: this.pageHost,
+        url: this.pageUrl,
+      },
       images: await this._getImages(),
       meta: await this._getMeta(),
       folder: this._makeFolder(),

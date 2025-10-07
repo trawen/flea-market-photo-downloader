@@ -1,6 +1,12 @@
 import { simulateClickByCoordinates, delay, getCleanUrl } from '../utils/index.js'
 
 export class Aukro {
+  constructor(pageUrl) {
+    this.pageUrl = pageUrl
+    this.pageId = new URL(this.pageUrl).pathname.split('-').pop()
+    this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, '')
+  }
+
   async _getImages() {
     await this._openGallery()
 
@@ -21,8 +27,8 @@ export class Aukro {
 
   async _getMeta() {
     const meta = {
-      id: this._getId(),
-      itemUrl: getCleanUrl(),
+      id: this.pageId,
+      itemUrl: this.pageUrl,
       sellerUrl: '',
       title: '',
       address: '',
@@ -57,18 +63,9 @@ export class Aukro {
     await delay(500)
   }
 
-  _getId() {
-    try {
-      const u = new URL(window.location.href)
-      return u.pathname.split('-').pop()
-    } catch (e) {
-      return null
-    }
-  }
-
   _makeFolder() {
     try {
-      const u = new URL(window.location.href)
+      const u = new URL(this.pageUrl)
       const lastSeg = u.pathname.split('/').filter(Boolean).pop()
       if (!lastSeg) return null
       return 'aukro.cz/' + lastSeg
@@ -79,6 +76,11 @@ export class Aukro {
 
   async collectData() {
     return {
+      page: {
+        id: this.pageId,
+        host: this.pageHost,
+        url: this.pageUrl,
+      },
       images: await this._getImages(),
       meta: await this._getMeta(),
       folder: this._makeFolder(),

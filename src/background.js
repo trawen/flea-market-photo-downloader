@@ -1,16 +1,51 @@
-chrome.runtime.onMessage.addListener((msg) => {
+import { simulateClickByCoordinates, delay } from './utils/index.js'
+
+function removeCookie(cookie) {
+  // нужно указать корректный протокол, чтобы chrome.cookies.remove принял url
+  const protocol = cookie.secure ? 'https://' : 'http://'
+  // cookie.domain может начинаться с точки
+  const domain = cookie.domain && cookie.domain.startsWith('.') ? cookie.domain.slice(1) : cookie.domain
+  const url = protocol + domain + (cookie.path || '/')
+  chrome.cookies.remove({ url, name: cookie.name }, (details) => {
+    console.log('details', details)
+  })
+}
+
+function clearCookies(host) {
+  try {
+    chrome.cookies.getAll({ domain: host }, (cookies) => {
+      console.log('cookies1', cookies)
+    })
+    chrome.cookies.getAll({ domain: host }, (cookies) => {
+      console.log('cookies2', cookies)
+      for (const c of cookies) {
+        console.log('for', c)
+        try {
+          removeCookie(c)
+        } catch (e) {
+          console.log('removeCookie error', e)
+        }
+      }
+    })
+  } catch (err) {
+    // если передан некорректный URL
+    console.error('Invalid URL passed to wipeCookiesForUrl:', err, tabUrl)
+  }
+}
+
+chrome.runtime.onMessage.addListener(async (msg) => {
   console.log('msg', msg)
   if (msg.action !== 'downloadImages') return
 
-  let { images = [], folder, pageId, host, meta = '' } = msg
+  let { page, images, meta, folder, isClearCookies = false } = msg
   if (!images.length) return
 
-  images.forEach((url, idx) => {
-    const fileName = `${idx}.webp`
+  for (let i = 0; i < images.length; i++) {
+    const fileName = `${i}.webp`
 
     chrome.downloads.download(
       {
-        url,
+        url: images[i],
         filename: `${folder}/${fileName}`,
       },
       (downloadId) => {
@@ -21,7 +56,10 @@ chrome.runtime.onMessage.addListener((msg) => {
         }
       }
     )
-  })
+
+    await delay(500 + Math.floor(Math.random() * 2500))
+    if (isClearCookies) clearCookies(page.host)
+  }
 
   meta = JSON.stringify(meta, null, 2)
 
@@ -47,15 +85,15 @@ chrome.runtime.onMessage.addListener((msg) => {
       }
     )
   } catch (e) {
-    console.error('Не удалось подготовить product_link.html:', e)
+    console.error('Не удалось сформировать item.html:', e)
   }
 
-  // сохраняем только ID + дату
-  chrome.storage.sync.get(['downloaded'], (res) => {
-    const downloaded = res.downloaded || {}
-    downloaded[pageId] = { date: new Date().toLocaleString(), host: host }
-    chrome.storage.sync.set({ downloaded }, () => {
-      console.log('Сохранена дата скачивания для', pageId)
+  chrome.storage.sync.get([page.host], (res) => {
+    const data = res[page.host] || []
+
+    data.push({ id: page.id, date: new Date().toLocaleString() })
+    chrome.storage.sync.set({ [page.host]: data }, () => {
+      console.log('Данные сохранениы', page.id)
     })
   })
 })

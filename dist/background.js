@@ -1,17 +1,50 @@
 (() => {
+  // src/utils/index.js
+  function delay(ms) {
+    return new Promise((res) => setTimeout(res, ms));
+  }
+
   // src/background.js
-  chrome.runtime.onMessage.addListener((msg) => {
+  function removeCookie(cookie) {
+    const protocol = cookie.secure ? "https://" : "http://";
+    const domain = cookie.domain && cookie.domain.startsWith(".") ? cookie.domain.slice(1) : cookie.domain;
+    const url = protocol + domain + (cookie.path || "/");
+    chrome.cookies.remove({ url, name: cookie.name }, (details) => {
+      console.log("details", details);
+    });
+  }
+  function clearCookies(host) {
+    try {
+      chrome.cookies.getAll({ domain: host }, (cookies) => {
+        console.log("cookies1", cookies);
+      });
+      chrome.cookies.getAll({ domain: host }, (cookies) => {
+        console.log("cookies2", cookies);
+        for (const c of cookies) {
+          console.log("for", c);
+          try {
+            removeCookie(c);
+          } catch (e) {
+            console.log("removeCookie error", e);
+          }
+        }
+      });
+    } catch (err) {
+      console.error("Invalid URL passed to wipeCookiesForUrl:", err, tabUrl);
+    }
+  }
+  chrome.runtime.onMessage.addListener(async (msg) => {
     console.log("msg", msg);
     if (msg.action !== "downloadImages")
       return;
-    let { images = [], folder, pageId, host, meta = "" } = msg;
+    let { page, images, meta, folder, isClearCookies = false } = msg;
     if (!images.length)
       return;
-    images.forEach((url, idx) => {
-      const fileName = `${idx}.webp`;
+    for (let i = 0; i < images.length; i++) {
+      const fileName = `${i}.webp`;
       chrome.downloads.download(
         {
-          url,
+          url: images[i],
           filename: `${folder}/${fileName}`
         },
         (downloadId) => {
@@ -22,7 +55,10 @@
           }
         }
       );
-    });
+      await delay(500 + Math.floor(Math.random() * 2500));
+      if (isClearCookies)
+        clearCookies(page.host);
+    }
     meta = JSON.stringify(meta, null, 2);
     try {
       const htmlContent = `<!doctype html>
@@ -45,13 +81,13 @@
         }
       );
     } catch (e) {
-      console.error("\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u043E\u0434\u0433\u043E\u0442\u043E\u0432\u0438\u0442\u044C product_link.html:", e);
+      console.error("\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0441\u0444\u043E\u0440\u043C\u0438\u0440\u043E\u0432\u0430\u0442\u044C item.html:", e);
     }
-    chrome.storage.sync.get(["downloaded"], (res) => {
-      const downloaded = res.downloaded || {};
-      downloaded[pageId] = { date: (/* @__PURE__ */ new Date()).toLocaleString(), host };
-      chrome.storage.sync.set({ downloaded }, () => {
-        console.log("\u0421\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0430 \u0434\u0430\u0442\u0430 \u0441\u043A\u0430\u0447\u0438\u0432\u0430\u043D\u0438\u044F \u0434\u043B\u044F", pageId);
+    chrome.storage.sync.get([page.host], (res) => {
+      const data = res[page.host] || [];
+      data.push({ id: page.id, date: (/* @__PURE__ */ new Date()).toLocaleString() });
+      chrome.storage.sync.set({ [page.host]: data }, () => {
+        console.log("\u0414\u0430\u043D\u043D\u044B\u0435 \u0441\u043E\u0445\u0440\u0430\u043D\u0435\u043D\u0438\u044B", page.id);
       });
     });
   });

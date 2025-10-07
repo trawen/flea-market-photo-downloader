@@ -3,7 +3,7 @@
   "name": "flea market downloader",
   "version": "0.1",
   "description": "Скачивает картинки товаров с eBay, Aukro, Avito.",
-  "permissions": ["activeTab", "scripting", "downloads", "storage"],
+  "permissions": ["activeTab", "scripting", "downloads", "storage", "cookies"],
   "host_permissions": [
     "*://*.ebay.com/*",
     "*://*.ebay.de/*",
@@ -14,7 +14,8 @@
     "*://*.avito.ru/*",
     "*://*.avito.st/*",
     "*://*.violity.com/*",
-    "*://*.olx.ua/*"
+    "*://*.olx.ua/*",
+    "*://*.olx.pt/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -41,7 +42,8 @@
         "*://*.avito.ru/*",
         "*://*.avito.st/*",
         "*://*.violity.com/*",
-        "*://*.olx.ua/*"
+        "*://*.olx.ua/*",
+        "*://*.olx.pt/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle",

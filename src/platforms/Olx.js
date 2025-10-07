@@ -1,6 +1,12 @@
 import { simulateClickByCoordinates, delay } from '../utils/index.js'
 
 export class Olx {
+  constructor(pageUrl) {
+    this.pageUrl = pageUrl
+    this.pageId = this.pageUrl.match(/-([A-Za-z0-9]+)\.html/)[1]
+    this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, '')
+  }
+
   async _getImages() {
     await this._openGallery()
     let images = []
@@ -20,8 +26,8 @@ export class Olx {
 
   async _getMeta() {
     const meta = {
-      id: this._getId(),
-      itemUrl: window.location.href,
+      id: this.pageId,
+      itemUrl: this.pageUrl,
       sellerUrl: '',
       title: '',
       address: '',
@@ -54,45 +60,16 @@ export class Olx {
     const { x, y, width, height } = document
       .querySelector('[data-testid="image-galery-container"]')
       .getBoundingClientRect()
-    console.log(' _openGallery', x, y, width, height)
     simulateClickByCoordinates(x + width / 2, y + height / 2)
     await delay(500)
   }
 
-  async _skipVideoSlide() {
-    const items = document.querySelectorAll('[data-marker="image-preview/item"]')
-
-    if (items.length > 1) {
-      const firstItem = items[0]
-      if (firstItem.dataset.type === 'video') {
-        items[1].click()
-        await delay(500)
-      }
-    }
-  }
-
-  async _nextImage() {
-    const { x, y, width, height } = document
-      .querySelector('[data-marker="extended-gallery-frame/control-right"]')
-      .getBoundingClientRect()
-    console.log('_nextImage', x, y, width, height, x + width / 2, y + height / 2)
-    simulateClickByCoordinates(x + width / 2, y + height / 2)
-  }
-
-  _getId() {
-    try {
-      return window.location.href.match(/-([A-Za-z0-9]+)\.html/)[1]
-    } catch (e) {
-      return null
-    }
-  }
-
   _makeFolder() {
     try {
-      const u = new URL(window.location.href)
+      const u = new URL(this.pageUrl)
       const lastSeg = u.pathname.split('/').filter(Boolean).pop()
       if (!lastSeg) throw new Error('Make folder get last segment error')
-      return u.hostname.replace(/^www\./, '') + '/' + lastSeg
+      return this.pageHost + '/' + lastSeg
     } catch (e) {
       return null
     }
@@ -100,6 +77,11 @@ export class Olx {
 
   async collectData() {
     return {
+      page: {
+        id: this.pageId,
+        host: this.pageHost,
+        url: this.pageUrl,
+      },
       images: await this._getImages(),
       meta: await this._getMeta(),
       folder: this._makeFolder(),
