@@ -85,6 +85,7 @@ export class Olx {
       images: await this._getImages(),
       meta: await this._getMeta(),
       folder: this._makeFolder(),
+      delayDownload: { min: 500, max: 2500 },
     }
   }
 }

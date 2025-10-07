@@ -37,7 +37,7 @@
     console.log("msg", msg);
     if (msg.action !== "downloadImages")
       return;
-    let { page, images, meta, folder, isClearCookies = false } = msg;
+    let { page, images, meta, folder, delayDownload = null, isClearCookies = false } = msg;
     if (!images.length)
       return;
     for (let i = 0; i < images.length; i++) {
@@ -55,7 +55,8 @@
           }
         }
       );
-      await delay(500 + Math.floor(Math.random() * 2500));
+      if (delayDownload)
+        await delay(delayDownload.min + Math.floor(Math.random() * (delayDownload.max - delayDownload.min)));
       if (isClearCookies)
         clearCookies(page.host);
     }
