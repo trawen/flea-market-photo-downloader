@@ -13,7 +13,7 @@ export class Aukro {
     let images = []
     try {
       // <pinch-zoom
-      const container = document.querySelector('.auk-media-gallery')
+      const container = document.querySelector('auk-media-gallery')
       if (!container) throw new Error('Не найден контейнер cdk-overlay-container.')
 
       images = Array.from(container.querySelectorAll('auk-media-gallery-thumb img')).map((img, i) => {
