@@ -242,7 +242,7 @@
       await this._openGallery();
       let images = [];
       try {
-        const container = document.querySelector("div.cdk-overlay-container");
+        const container = document.querySelector(".auk-media-gallery");
         if (!container)
           throw new Error("\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D \u043A\u043E\u043D\u0442\u0435\u0439\u043D\u0435\u0440 cdk-overlay-container.");
         images = Array.from(container.querySelectorAll("auk-media-gallery-thumb img")).map((img, i) => {
@@ -290,7 +290,7 @@
         const lastSeg = u.pathname.split("/").filter(Boolean).pop();
         if (!lastSeg)
           return null;
-        return "aukro.cz/" + lastSeg;
+        return u.host + "/" + lastSeg;
       } catch (e) {
         return null;
       }

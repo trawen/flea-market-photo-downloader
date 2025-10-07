@@ -69,7 +69,7 @@ export class Aukro {
       const u = new URL(this.pageUrl)
       const lastSeg = u.pathname.split('/').filter(Boolean).pop()
       if (!lastSeg) return null
-      return 'aukro.cz/' + lastSeg
+      return u.host + '/' + lastSeg
     } catch (e) {
       return null
     }
