@@ -393,6 +393,7 @@
     "avito.ru": Avito,
     "violity.com": Violity,
     "aukro.cz": Aukro,
+    "aukro.sk": Aukro,
     "olx.ua": Olx,
     "olx.pt": Olx
   };
