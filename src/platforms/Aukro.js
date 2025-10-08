@@ -20,6 +20,9 @@ export class Aukro {
         // remove from url 73x73
         return img.src.replace(/\/\d+x\d+\//, '/')
       })
+
+      // single photo
+      if (images.length === 0) images.push(container.querySelector('img').src.replace(/\/\d+x\d+\//, '/'))
     } catch (e) {
       console.log('getImages error', e)
     }
