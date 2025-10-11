@@ -3,7 +3,7 @@ import { simulateClickByCoordinates, delay, getCleanUrl } from '../utils/index.j
 export class Meshok {
   constructor(pageUrl) {
     this.pageUrl = pageUrl
-    this.pageId = this.pageUrl.match(/\/item\/(\d+)/)[1]
+    this.pageId = decodeURIComponent(this.pageUrl).match(/\/item\/(\d+)/)[1]
     this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, '')
   }
 
@@ -65,7 +65,7 @@ export class Meshok {
   _makeFolder() {
     try {
       const u = new URL(this.pageUrl)
-      const lastSeg = u.pathname.split('/').filter(Boolean).pop()
+      const lastSeg = decodeURIComponent(u.pathname).split('/').filter(Boolean).pop()
       if (!lastSeg) return null
       return u.host + '/' + lastSeg
     } catch (e) {
