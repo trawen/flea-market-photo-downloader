@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "flea market downloader",
   "version": "0.1",
-  "description": "Скачивает картинки товаров с eBay, Aukro, Avito.",
+  "description": "Скачивает карточки товаров - eBay, Aukro, Avito, Olx, Meshok.",
   "permissions": ["activeTab", "scripting", "downloads", "storage", "cookies"],
   "host_permissions": [
     "*://*.ebay.com/*",
@@ -16,7 +16,8 @@
     "*://*.avito.st/*",
     "*://*.violity.com/*",
     "*://*.olx.ua/*",
-    "*://*.olx.pt/*"
+    "*://*.olx.pt/*",
+    "*://*.meshok.net/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -45,7 +46,8 @@
         "*://*.avito.st/*",
         "*://*.violity.com/*",
         "*://*.olx.ua/*",
-        "*://*.olx.pt/*"
+        "*://*.olx.pt/*",
+        "*://*.meshok.net/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle",

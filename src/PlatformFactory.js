@@ -3,6 +3,7 @@ import { Avito } from './platforms/Avito.js'
 import { Violity } from './platforms/Violity.js'
 import { Aukro } from './platforms/Aukro.js'
 import { Olx } from './platforms/Olx.js'
+import { Meshok } from './platforms/Meshok.js'
 
 const adapters = {
   'avito.ru': Avito,
@@ -11,6 +12,7 @@ const adapters = {
   'aukro.sk': Aukro,
   'olx.ua': Olx,
   'olx.pt': Olx,
+  'meshok.net': Meshok,
 }
 
 export default class PlatformFactory {

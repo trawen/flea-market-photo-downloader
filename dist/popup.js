@@ -248,6 +248,8 @@
         images = Array.from(container.querySelectorAll("auk-media-gallery-thumb img")).map((img, i) => {
           return img.src.replace(/\/\d+x\d+\//, "/");
         });
+        if (images.length === 0)
+          images.push(container.querySelector("img").src.replace(/\/\d+x\d+\//, "/"));
       } catch (e) {
         console.log("getImages error", e);
       }
@@ -388,6 +390,85 @@
     }
   };
 
+  // src/platforms/Meshok.js
+  var Meshok = class {
+    constructor(pageUrl) {
+      this.pageUrl = pageUrl;
+      this.pageId = this.pageUrl.match(/\/item\/(\d+)/)[1];
+      this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, "");
+    }
+    async _getImages() {
+      let images = [];
+      try {
+        const img = document.querySelector('[class^="mainImage_"] img');
+        if (!img)
+          throw new Error("\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u0430 \u0433\u043B\u0430\u0432\u043D\u0430\u044F \u043A\u0430\u0440\u0442\u0438\u043D\u043A\u0430");
+        images.push(this._fixImgUrl(img.src));
+        const imgs = document.querySelectorAll('[class^="thumbnailImage_"] img');
+        if (!imgs)
+          throw new Error("\u041D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u044B \u043F\u0440\u0435\u0432\u044C\u044E");
+        images = Array.from(imgs).map((img2, i) => {
+          return this._fixImgUrl(img2.src);
+        });
+      } catch (e) {
+        console.log("getImages error", e);
+      }
+      return images;
+    }
+    _fixImgUrl(url) {
+      return url.replace(/\.\d+x\d+s(?=\.\w+$)/, "");
+    }
+    async _getMeta() {
+      const meta = {
+        id: this.pageId,
+        itemUrl: this.pageUrl,
+        sellerUrl: "",
+        title: "",
+        address: "",
+        price: "",
+        description: "",
+        downloadAt: (/* @__PURE__ */ new Date()).toLocaleString()
+      };
+      try {
+        meta.title = document.querySelector('[class^="titleText_"]')?.innerText || document.title || "meshok-item";
+        const addrEl = document.querySelector('div.m-seller-common-info [class^="itemText_"]');
+        meta.address = addrEl ? addrEl.innerText.trim() : "";
+        const priceEl = document.querySelector('b[itemprop="price"]');
+        meta.price = priceEl ? priceEl.innerText.trim() : "";
+        const descriptionEl = document.querySelector('[itemprop="description"]');
+        meta.description = descriptionEl ? descriptionEl.innerText.trim() : "";
+        const sellerEl = document.querySelector('[class^="displayName_"]');
+        meta.sellerUrl = sellerEl?.href;
+      } catch (e) {
+        console.log("getMeta error", e);
+      }
+      return meta;
+    }
+    _makeFolder() {
+      try {
+        const u = new URL(this.pageUrl);
+        const lastSeg = u.pathname.split("/").filter(Boolean).pop();
+        if (!lastSeg)
+          return null;
+        return u.host + "/" + lastSeg;
+      } catch (e) {
+        return null;
+      }
+    }
+    async collectData() {
+      return {
+        page: {
+          id: this.pageId,
+          host: this.pageHost,
+          url: this.pageUrl
+        },
+        images: await this._getImages(),
+        meta: await this._getMeta(),
+        folder: this._makeFolder()
+      };
+    }
+  };
+
   // src/PlatformFactory.js
   var adapters = {
     "avito.ru": Avito,
@@ -395,7 +476,8 @@
     "aukro.cz": Aukro,
     "aukro.sk": Aukro,
     "olx.ua": Olx,
-    "olx.pt": Olx
+    "olx.pt": Olx,
+    "meshok.net": Meshok
   };
   var PlatformFactory = class {
     static create(url) {

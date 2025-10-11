@@ -1,31 +1,33 @@
 import { simulateClickByCoordinates, delay, getCleanUrl } from '../utils/index.js'
 
-export class Aukro {
+export class Meshok {
   constructor(pageUrl) {
     this.pageUrl = pageUrl
-    this.pageId = new URL(this.pageUrl).pathname.split('-').pop()
+    this.pageId = this.pageUrl.match(/\/item\/(\d+)/)[1]
     this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, '')
   }
 
   async _getImages() {
-    await this._openGallery()
-
     let images = []
     try {
-      const container = document.querySelector('auk-media-gallery')
-      if (!container) throw new Error('Не найден контейнер cdk-overlay-container.')
+      const img = document.querySelector('[class^="mainImage_"] img')
+      if (!img) throw new Error('Не найдена главная картинка')
+      images.push(this._fixImgUrl(img.src))
+      const imgs = document.querySelectorAll('[class^="thumbnailImage_"] img')
+      if (!imgs) throw new Error('Не найдены превью')
 
-      images = Array.from(container.querySelectorAll('auk-media-gallery-thumb img')).map((img, i) => {
-        // remove from url 73x73
-        return img.src.replace(/\/\d+x\d+\//, '/')
+      images = Array.from(imgs).map((img, i) => {
+        // https://meshok.net/i/345814823.0.208x208s.jpg remove .208x208s
+        return this._fixImgUrl(img.src)
       })
-
-      // single photo
-      if (images.length === 0) images.push(container.querySelector('img').src.replace(/\/\d+x\d+\//, '/'))
     } catch (e) {
       console.log('getImages error', e)
     }
     return images
+  }
+
+  _fixImgUrl(url) {
+    return url.replace(/\.\d+x\d+s(?=\.\w+$)/, '')
   }
 
   async _getMeta() {
@@ -41,29 +43,23 @@ export class Aukro {
     }
 
     try {
-      meta.title = document.querySelector('auk-translation-box-content')?.innerText || document.title || 'aukro-item'
+      meta.title = document.querySelector('[class^="titleText_"]')?.innerText || document.title || 'meshok-item'
 
-      const addrEl = document.querySelector('.location-text')
+      const addrEl = document.querySelector('div.m-seller-common-info [class^="itemText_"]')
       meta.address = addrEl ? addrEl.innerText.trim() : ''
 
-      const priceEl = document.querySelector('auk-item-detail-main-item-panel-price span[aria-live="polite"]')
+      const priceEl = document.querySelector('b[itemprop="price"]')
       meta.price = priceEl ? priceEl.innerText.trim() : ''
 
-      const descriptionEl = document.getElementById('user-field')
+      const descriptionEl = document.querySelector('[itemprop="description"]')
       meta.description = descriptionEl ? descriptionEl.innerText.trim() : ''
 
-      const sellerEl = document.querySelector('auk-user-chip a')
+      const sellerEl = document.querySelector('[class^="displayName_"]')
       meta.sellerUrl = sellerEl?.href
     } catch (e) {
       console.log('getMeta error', e)
     }
     return meta
-  }
-
-  async _openGallery() {
-    const { x, y, width, height } = document.querySelector('auk-item-detail-current-media').getBoundingClientRect()
-    simulateClickByCoordinates(x + width / 2, y + height / 2)
-    await delay(500)
   }
 
   _makeFolder() {
