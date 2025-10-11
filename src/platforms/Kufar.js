@@ -10,7 +10,7 @@ export class Kufar {
   async _getImages() {
     let images = []
     try {
-      const imgs = document.querySelectorAll('[class^="styles_thumbnail__slide__"] img')
+      const imgs = document.querySelectorAll('img[alt="gallery-thumb"]')
       if (!imgs) throw new Error('Превью не найдены')
 
       images = Array.from(imgs).map((img, i) => {
@@ -45,7 +45,7 @@ export class Kufar {
       const addrEl = document.querySelector('[class^="styles_address__"]')
       meta.address = addrEl ? addrEl.innerText.trim() : ''
 
-      const priceEl = document.querySelector('[class^="styles_brief_wrapper__price__"]')
+      const priceEl = document.querySelector('[class*="styles_brief_wrapper__price__"]')
       meta.price = priceEl ? priceEl.innerText.trim() : ''
 
       const descriptionEl = document.querySelector('[itemprop="description"]')

@@ -479,7 +479,7 @@
     async _getImages() {
       let images = [];
       try {
-        const imgs = document.querySelectorAll('[class^="styles_thumbnail__slide__"] img');
+        const imgs = document.querySelectorAll('img[alt="gallery-thumb"]');
         if (!imgs)
           throw new Error("\u041F\u0440\u0435\u0432\u044C\u044E \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u044B");
         images = Array.from(imgs).map((img, i) => {
@@ -508,7 +508,7 @@
         meta.title = document.querySelector("h1")?.innerText || document.title || "meshok-item";
         const addrEl = document.querySelector('[class^="styles_address__"]');
         meta.address = addrEl ? addrEl.innerText.trim() : "";
-        const priceEl = document.querySelector('[class^="styles_brief_wrapper__price__"]');
+        const priceEl = document.querySelector('[class*="styles_brief_wrapper__price__"]');
         meta.price = priceEl ? priceEl.innerText.trim() : "";
         const descriptionEl = document.querySelector('[itemprop="description"]');
         meta.description = descriptionEl ? descriptionEl.innerText.trim() : "";
