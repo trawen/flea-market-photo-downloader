@@ -469,6 +469,81 @@
     }
   };
 
+  // src/platforms/Kufar.js
+  var Kufar = class {
+    constructor(pageUrl) {
+      this.pageUrl = pageUrl;
+      this.pageId = decodeURIComponent(this.pageUrl).match(/\/item\/(\d+)/)[1];
+      this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, "");
+    }
+    async _getImages() {
+      let images = [];
+      try {
+        const imgs = document.querySelectorAll('[class^="styles_thumbnail__slide__"] img');
+        if (!imgs)
+          throw new Error("\u041F\u0440\u0435\u0432\u044C\u044E \u043D\u0435 \u043D\u0430\u0439\u0434\u0435\u043D\u044B");
+        images = Array.from(imgs).map((img, i) => {
+          return this._fixImgUrl(img.src);
+        });
+      } catch (e) {
+        console.log("getImages error", e);
+      }
+      return images;
+    }
+    _fixImgUrl(url) {
+      return "https://rms6.kufar.by/v1/gallery/adim1/" + url.split("/").filter(Boolean).pop();
+    }
+    async _getMeta() {
+      const meta = {
+        id: this.pageId,
+        itemUrl: this.pageUrl,
+        sellerUrl: "",
+        title: "",
+        address: "",
+        price: "",
+        description: "",
+        downloadAt: (/* @__PURE__ */ new Date()).toLocaleString()
+      };
+      try {
+        meta.title = document.querySelector("h1")?.innerText || document.title || "meshok-item";
+        const addrEl = document.querySelector('[class^="styles_address__"]');
+        meta.address = addrEl ? addrEl.innerText.trim() : "";
+        const priceEl = document.querySelector('[class^="styles_brief_wrapper__price__"]');
+        meta.price = priceEl ? priceEl.innerText.trim() : "";
+        const descriptionEl = document.querySelector('[itemprop="description"]');
+        meta.description = descriptionEl ? descriptionEl.innerText.trim() : "";
+        const sellerEl = document.querySelector('[data-name="seller-block"]');
+        meta.sellerUrl = sellerEl?.getAttribute("data-link");
+      } catch (e) {
+        console.log("getMeta error", e);
+      }
+      return meta;
+    }
+    _makeFolder() {
+      try {
+        const u = new URL(this.pageUrl);
+        const lastSeg = decodeURIComponent(u.pathname).split("/").filter(Boolean).pop();
+        if (!lastSeg)
+          return null;
+        return u.host + "/" + lastSeg;
+      } catch (e) {
+        return null;
+      }
+    }
+    async collectData() {
+      return {
+        page: {
+          id: this.pageId,
+          host: this.pageHost,
+          url: this.pageUrl
+        },
+        images: await this._getImages(),
+        meta: await this._getMeta(),
+        folder: this._makeFolder()
+      };
+    }
+  };
+
   // src/PlatformFactory.js
   var adapters = {
     "avito.ru": Avito,
@@ -477,14 +552,13 @@
     "aukro.sk": Aukro,
     "olx.ua": Olx,
     "olx.pt": Olx,
-    "meshok.net": Meshok
+    "meshok.net": Meshok,
+    "kufar.by": Kufar
   };
   var PlatformFactory = class {
     static create(url) {
       const hostname = new URL(url).hostname.replace(/^www\./, "");
-      console.log("hostname", hostname);
       const Adapter = adapters[hostname];
-      console.log("Adapter", Adapter);
       return Adapter ? new Adapter(url) : null;
     }
   };

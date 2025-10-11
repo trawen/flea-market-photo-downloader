@@ -17,7 +17,8 @@
     "*://*.violity.com/*",
     "*://*.olx.ua/*",
     "*://*.olx.pt/*",
-    "*://*.meshok.net/*"
+    "*://*.meshok.net/*",
+    "*://*.kufar.by/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -47,7 +48,8 @@
         "*://*.violity.com/*",
         "*://*.olx.ua/*",
         "*://*.olx.pt/*",
-        "*://*.meshok.net/*"
+        "*://*.meshok.net/*",
+        "*://*.kufar.by/*"
       ],
       "js": ["content.js"],
       "run_at": "document_idle",
