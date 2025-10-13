@@ -149,7 +149,7 @@
   var Violity = class {
     constructor(pageUrl) {
       this.pageUrl = pageUrl;
-      this.pageId = this.pageUrl.match(/-([A-Za-z0-9]+)\.html/)[1];
+      this.pageId = this.pageUrl.match(/\/(\d+)(?:[-\/?]|$)/)[1];
       this.pageHost = new URL(this.pageUrl).hostname.replace(/^www\./, "");
     }
     async _getImages() {
