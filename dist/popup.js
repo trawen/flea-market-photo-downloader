@@ -558,7 +558,9 @@
   var PlatformFactory = class {
     static create(url) {
       const hostname = new URL(url).hostname.replace(/^www\./, "");
+      console.log("hostname", hostname);
       const Adapter = adapters[hostname];
+      console.log("Adapter", Adapter);
       return Adapter ? new Adapter(url) : null;
     }
   };
